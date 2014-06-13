@@ -1,0 +1,25 @@
+<%
+   issues_measure = measure('redmine-issues')
+   issues_by_priority_measure = measure('redmine-issues-by-priority')
+
+   if issues_measure
+%>
+<table width="100%">
+  <tbody>
+    <tr>
+      <td width="50%">
+      
+      <div class="dashbox">
+		<h3 class="title">References</h3>
+		<div class="marginbottom10">
+		<span class="big link-rules-issues">
+		<a href="/bcref/showcharts/<%= @resource.permanent_id %>" class="" rel="" title=""><span id="m_bcref">Metrics</span></a>
+		</span>
+		</div>
+	  </div>
+	  
+      </td>
+    </tr>
+  </tbody>
+</table>
+<% end %>

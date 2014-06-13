@@ -1,0 +1,14 @@
+<div class="marginbottom10">
+  
+    <h3>References</h3>
+
+    <p class="big">
+      <span id="m_ncloc">Metrics</span>
+    </p>
+</div>
+
+<div class="drilldown" class="width100">
+<% @selectImgs.each do |key,value| %>
+  <p><%= image_tag(url_for_static(:plugin => 'redmine', :path => value), :style => 'vertical-align:middle;margin-left:auto;margin-right:auto;display:block;margin-top:20px;margin-bottom:20px') -%></p>
+<% end %>
+</div>

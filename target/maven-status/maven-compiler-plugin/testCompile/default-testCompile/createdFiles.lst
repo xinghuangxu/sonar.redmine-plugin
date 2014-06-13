@@ -1,0 +1,12 @@
+org\sonar\plugins\redmine\ui\RedmineWidgetTest.class
+org\sonar\plugins\redmine\reviews\RedmineLinkFunctionTest.class
+org\sonar\plugins\redmine\config\RedmineSettingsTest.class
+org\sonar\plugins\redmine\RedmineSensorTest.class
+org\sonar\plugins\redmine\exceptions\ExceptionUtilTest.class
+org\sonar\plugins\redmine\reviews\RedmineIssueFactoryTest.class
+org\sonar\plugins\redmine\client\RedmineAdapterTest.class
+org\sonar\plugins\redmine\RedmineMetricsTest.class
+org\sonar\plugins\redmine\ui\RedmineSettingsPageTest.class
+org\sonar\plugins\redmine\reviews\RedmineWorkflowBuilderTest.class
+org\sonar\plugins\redmine\RedminePluginTest.class
+org\sonar\plugins\redmine\batch\RedmineSettingsTest.class

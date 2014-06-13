@@ -1,0 +1,818 @@
+<%= render :partial => 'header' -%>
+
+
+
+<% if params[:period] && @snapshot.project_snapshot.periods? %>
+
+  <div id="snapshot_title" class="page_title">
+
+    <h4>
+
+      <form method="GET" action="<%= url_for :action => 'measures' -%>" style="display: inline">
+
+        <input type="hidden" name="metric" value="<%= params[:metric] -%>"/>
+
+
+
+        <select id="select-comparison" name="period" onchange="submit()">
+
+          <% if @drilldown.display_value? %>
+
+            <option value=""><%= message('time_changes') -%>...</option>
+
+          <% end %>
+
+          <% for period_index in 1..5 do %>
+
+            <%= period_select_options(@snapshot, period_index) if @drilldown.display_period?(period_index) -%>
+
+          <% end %>
+
+        </select>
+
+        <script>
+
+          $j(function() {
+
+            $j('#select-comparison').select2({
+
+              width: '300px',
+
+              minimumResultsForSearch: 10,
+
+              dropdownCssClass: 'small'
+
+            });
+
+          });
+
+        </script>
+
+      </form>
+
+    </h4>
+
+  </div>
+
+<% end %>
+
+
+
+<div class="marginbottom10">
+
+  <% if @characteristic %>
+
+    <h3><%= @highlighted_metric.short_name -%> / <%= h(@characteristic.name(true)) -%></h3>
+
+
+
+    <p class="big"><%= format_measure(@snapshot.characteristic_measure(@highlighted_metric, @characteristic)) %></p>
+
+  <% else %>
+
+    <h3><%= @highlighted_metric.short_name -%></h3>
+
+
+
+    <p class="big">
+
+      <%= format_measure(@snapshot.measure(@highlighted_metric.key), :period => @period) %>
+
+    </p>
+
+  <% end %>
+
+  <% if @highlighted_metric!=@metric %>
+
+    <p>
+
+      <%= message('drilldown.drilldown_on') -%>&nbsp;
+
+      <b><%= format_measure(@metric.key, :period => @period) -%> <%= @metric.short_name -%></b>
+
+    </p>
+
+  <% end %>
+
+</div>
+
+
+
+<div id="drilldown" class="width100">
+
+  <%
+
+     rids=[]
+
+     first_column=true
+
+     @drilldown.columns.each_with_index do |column, index|
+
+  %>
+
+    <% if first_column %>
+
+      <table id="tb-drilldown" class="width100 spacer-bottom">
+
+        <tr>
+
+    <% end %>
+
+    <!-- <div><%= column.qualifiers.inspect %></div> -->
+
+    <% if column.qualifiers.include? 'DIR' 
+
+          td_class='qa-dir-col' 
+
+        elsif column.qualifiers.include? 'FIL'
+
+          td_class='qa-file-col'
+
+        else 
+
+          td_class=''
+
+        end
+
+        %>
+
+    <td class="<%= 'spacer-left' unless first_column -%> <%= td_class %>" nowrap>
+
+      <div class="scrollable" id="col_<%= index -%>">
+
+        <table class="spaced">
+
+          <% column.measures.each_with_index do |measure, row_index|
+
+            resource=column.resource(measure)
+
+            selected = column.selected_snapshot && column.selected_snapshot.project_id==resource.id
+
+            clazz = cycle("even", "odd", :name => "col_#{index}")
+
+            clazz = clazz + ' selected' if selected
+
+          %>
+
+            <tr class="<%= clazz -%>" id="row_<%= index -%>_<%= row_index -%>">
+
+              <td nowrap>
+
+                <!-- <div><%= resource.qualifier %></div> -->
+
+                <% if resource.source_code? %>
+
+                  <a href="<%= url_for :controller => 'resource', :action => 'index', :id => resource.key, :period => @period, :metric => (@metric && @metric.id), :rule => @rule ? @rule.id : @severity, :display_title => 'true' -%>"
+
+                     onclick="window.open(this.href,'resource-<%= resource.key.parameterize -%>','height=800,width=900,scrollbars=1,resizable=1');return false;"
+
+                     id="popup-<%= resource.key.parameterize -%>"
+
+                     target="_blank"><%= image_tag 'new-window-16.gif', :alt => message('new_window') -%></a>
+
+                <% else %>
+
+                  <%= link_to(image_tag('zoom.png'), {:id => resource.id, :metric => @metric.id}, {:class => 'nolink'}) -%>
+
+                <% end %>
+
+                <%= qualifier_icon(resource) -%>&nbsp;
+
+                <% if resource.source_code? %>
+
+                  <a href="#" onclick="$j('#col_<%= index -%> tr').removeClass('selected'); $j('#row_<%= index -%>_<%= row_index -%>').addClass('selected'); d(<%= resource.id -%>)"
+
+                     alt="<%= h resource.name(true) -%>" title="<%= h resource.name(true) -%>" class="qa-tc"><%= h resource.name(false) -%></a>
+
+                <% else %>
+
+                  <% if resource.qualifier=='DIR' %>
+
+                  <%= link_to(h(resource.name), {:only_path => true, :overwrite_params => {:rids => (selected ? rids-[resource.id] : rids+[resource.id])}},:class=>'qa-ts') -%>
+
+                  <% else %>
+
+                  <%= link_to(h(resource.name), {:only_path => true, :overwrite_params => {:rids => (selected ? rids-[resource.id] : rids+[resource.id])}}) -%>
+
+                  <% end %>
+
+                <% end %>
+
+              </td>
+
+              <td class="right">
+
+                <%= format_measure(measure, :skip_span_id => true, :period => @period) -%>
+
+              </td>
+
+            </tr>
+
+          <% end %>
+
+        </table>
+
+      </div>
+
+    </td>
+
+
+
+    <% if column.switch? || index==@drilldown.columns.size-1 %>
+
+      </tr>
+
+      </table>
+
+    <% end
+
+       first_column = column.switch?
+
+       rids<<column.selected_snapshot.project_id if column.selected_snapshot
+
+       end
+
+    %>
+
+</div>
+
+<script>
+
+  <% for i in 0...@drilldown.columns.size do  %>
+
+  $j('#col_<%= i -%> tr.selected').each(function (index,item) {
+
+    item.scrollIntoView(true);
+
+  });
+
+  <% end %>
+
+
+
+  //$j('#content').hide();
+
+  //alert("hello!");
+
+
+
+  //get rid of the .cc suffix
+
+  var QaTestCollectionInstance={};
+
+  (function(QaTestCollectionInstance){
+
+
+
+    $j('.qa-tc').each(function(){
+
+      var el=$j(this);
+
+      var text=el.text();
+
+      var length=text.length;
+
+      el.text(text.substring(0,length-3));
+
+    });
+
+
+
+    var tDrilldown=$j('#tb-drilldown');
+
+    var tdDirCol=$j('.qa-dir-col');
+
+    var tdFileCol=$j('.qa-file-col');
+
+    tdDirCol.hide();
+
+   
+
+    
+
+
+
+    function extend(obj,fname,func){
+
+      obj.prototype.fname=func;
+
+    };
+
+
+
+    function GenericQaCollection(parent,name){
+
+      this.types={};
+
+      this.value=0;
+
+      this.parent=parent;
+
+      this.name=name;
+
+
+
+      this.addToType=function(words,el){
+
+        var key=words[1];
+
+        if(!this.types[key]){
+
+          this.types[key]=eval("new "+this.chilClassName+"(this,key)");
+
+        }
+
+        words.shift();
+
+        this.types[key].addToType(words,el);
+
+      };
+
+      this.addValue=function(value){
+
+        this.value+=value;
+
+        if(this.parent)
+
+          this.parent.addValue(value);
+
+      }
+
+
+
+    }
+
+
+
+
+
+
+
+    function QaTestCollection(tdDirCol){
+
+      var that=this;
+
+      this.QaTypeCollection=new QaTypeCollection();
+
+      var aTestSet=tdDirCol.find('.qa-ts');
+
+      aTestSet.each(function(){
+
+        var el=$j(this);
+
+        var text=$j(this).text();
+
+        that.QaTypeCollection.add(text.split('/'),el);
+
+      });
+
+      this.generateView=function(tdDirCol){
+
+        this.QaTypeCollection.generateView(tdDirCol);
+
+      }
+
+    }
+
+
+
+    
+
+    function QaTypeCollection(parent,name) {
+
+      this.chilClassName="QaLevelCollection";
+
+      GenericQaCollection.apply(this,[parent,name]);
+
+      this.add=function(words,el){
+
+        if(words.length<4){
+
+          //el.parent().parent().remove();
+
+          return;
+
+        }
+
+        while(words.length>1){
+
+          if(words[1]!="Stress"&&words[1]!="Functional")
+
+            words.shift();
+
+          else 
+
+            break;
+
+        }
+
+        if(words.length>0){
+
+          this.addToType(words,el);
+
+        }
+
+      }
+
+
+
+      this.generateView=function(tdDirCol,key,autoStop){
+
+        var that=this;
+
+        var types=this.types;
+
+        var selected=this.types[key];
+
+        var selectedKey=key;
+
+        var keys=Object.keys(this.types);
+
+        if(keys.length==0)return;
+
+        if(!selected){
+
+          selected=this.types[keys[0]];
+
+          selectedKey=keys[0];
+
+        }
+
+        var td=$j("<td nowrap></td>").attr("class",tdDirCol.attr("class"));
+
+        var div=$j("<div class='scrollable'></div>").attr("id",tdDirCol.attr("id")+"_1");
+
+        var table=$j("<table class='spaced'></div>");
+
+        var tbody=$j("<tbody></tbody>");
+
+
+
+        var i=0;
+
+        $j.each(keys,function(index,value){
+
+          var testResult=types[value].value;
+
+          if(testResult==0)testResult="";
+
+          var tr=$j("<tr></tr>").attr("class", index%2==0?"even":"odd");
+
+          if(value==selectedKey)
+
+            tr.addClass("selected");
+
+          var td=$j("<td nowrap></td>");
+
+          var td2=$j("<td class='right'></td>").append("<span>"+testResult+"</span>");
+
+          var i=$j("<i class='icon-qualifier-dir'></i>");
+
+          var a=$j("<a href='#'></a>").text(value);
+
+          a.click(function(){
+
+            that.generateView(tdDirCol,value);
+
+            tdFileCol.hide();
+
+          });
+
+          tbody.append(tr.append(td.append(i,"&nbsp;",a),td2));
+
+        });
+
+        if(this.view){
+
+          this.view.find("div").remove();
+
+          this.view.append(div.append(table.append(tbody)));
+
+        }else{
+
+          this.view=td.append(div.append(table.append(tbody)));
+
+          tdDirCol.before(this.view);
+
+        }
+
+        if(!autoStop)
+
+          selected.generateView(tdDirCol);
+
+      };
+
+
+
+      this.generateParentView=function(tdDirCol,key){
+
+        this.generateView(tdDirCol,key,true);
+
+      }
+
+    };
+
+    QaTypeCollection.prototype.view=$j("<td nowrap></td>").attr("class",tdDirCol.attr("class"));;
+
+    tdDirCol.before(QaTypeCollection.prototype.view);
+
+
+
+
+
+    function QaLevelCollection(parent,name){
+
+      this.chilClassName="QaTestSetCollection";
+
+      GenericQaCollection.apply(this,[parent,name]);
+
+
+
+      this.generateView=function(tdDirCol,key,autoStop){
+
+        var that=this;
+
+        var types=this.types;
+
+        var selected=this.types[key];
+
+        var selectedKey=key;
+
+        var keys=Object.keys(this.types);
+
+        if(keys.length==0)return;
+
+        if(!selected){
+
+          selected=this.types[keys[0]];
+
+          selectedKey=keys[0];
+
+        }
+
+        var td=$j("<td nowrap></td>").attr("class",tdDirCol.attr("class"));
+
+        var div=$j("<div class='scrollable'></div>").attr("id",tdDirCol.attr("id")+"_1");
+
+        var table=$j("<table class='spaced'></div>");
+
+        var tbody=$j("<tbody></tbody>");
+
+
+
+        var i=0;
+
+        $j.each(keys,function(index,value){
+
+          var testResult=types[value].value;
+
+          if(testResult==0)testResult="";
+
+          var tr=$j("<tr></tr>").attr("class", index%2==0?"even":"odd");
+
+          if(value==selectedKey)
+
+            tr.addClass("selected");
+
+          var td=$j("<td nowrap></td>");
+
+          var td2=$j("<td class='right'></td>").append("<span>"+testResult+"</span>");
+
+          var i=$j("<i class='icon-qualifier-dir'></i>");
+
+          var a=$j("<a href='#'></a>").text(value);
+
+          a.click(function(){
+
+            that.generateView(tdDirCol,value);
+
+            tdFileCol.hide();
+
+          });
+
+          tbody.append(tr.append(td.append(i,"&nbsp;",a),td2));
+
+        });
+
+        if(this.view){
+
+          this.view.find("div").remove();
+
+          this.view.append(div.append(table.append(tbody)));
+
+        }else{
+
+          this.view=td.append(div.append(table.append(tbody)));
+
+          tdDirCol.before(this.view);
+
+        }
+
+        if(!autoStop)
+
+          selected.generateView(tdDirCol);
+
+      };
+
+      this.generateParentView=function(tdDirCol,key){
+
+        this.generateView(tdDirCol,key,true);
+
+        this.parent.generateParentView(tdDirCol,this.name)
+
+      }
+
+    };
+
+    QaLevelCollection.prototype.view=$j("<td nowrap></td>").attr("class","spacer-left qa-dir-col");;
+
+    tdDirCol.before(QaLevelCollection.prototype.view);
+
+
+
+    var testsetView=null;
+
+
+
+    function QaTestSetCollection(parent,name){
+
+      this.chilClassName="QaTestSet";
+
+      GenericQaCollection.apply(this,[parent,name]);
+
+
+
+      this.generateParentView=function(tdDirCol,key){
+
+        this.generateView(tdDirCol,key);
+
+        this.parent.generateParentView(tdDirCol,this.name);
+
+      };
+
+
+
+      this.generateView=function(tdDirC,key){
+
+
+
+        var types=this.types;
+
+        var selected=this.types[key];
+
+        var selectedKey=key;
+
+        var keys=Object.keys(this.types);
+
+        if(keys.length==0)return;
+
+        // if(!selected){
+
+        //   selected=this.types[keys[0]];
+
+        //   selectedKey=keys[0];
+
+        // }
+
+
+
+        var td=$j("<td nowrap></td>").attr("class",tdDirCol.attr("class"));
+
+        var div=$j("<div class='scrollable'></div>").attr("id",tdDirCol.attr("id")+"_1");
+
+        var table=$j("<table class='spaced'></div>");
+
+        var tbody=$j("<tbody></tbody>");
+
+
+
+        var i=0;
+
+        $j.each(keys,function(index,value){
+
+          var deepClone=types[value].el.parent().parent().clone(true);
+
+          deepClone.attr("class",index%2==0?"even":"odd");
+
+          if(value==selectedKey)
+
+            deepClone.addClass("selected");
+
+          tbody.append(deepClone);
+
+        });
+
+        this.view.find("div").remove();
+
+        this.view.append(div.append(table.append(tbody)));
+
+        
+
+      };
+
+    };
+
+    QaTestSetCollection.prototype.view=$j("<td nowrap></td>").attr("class","spacer-left qa-dir-col");;
+
+    tdDirCol.before(QaTestSetCollection.prototype.view);
+
+
+
+    function QaTestSet(parent){
+
+       this.name="N/A";
+
+       this.el=null;
+
+       this.parent=parent;
+
+       this.addToType=function(words,el){
+
+        if(words.length>0)
+
+          this.name=words[0];
+
+        this.el=el;
+
+        var trEl=el.parent().parent();
+
+        var text=trEl.children(".right").text();
+
+        if(text.indexOf('%')!=-1){
+
+          text=text.substring(0,text.indexOf("%"));
+
+          this.value=0;
+
+        }else{
+
+          this.value=Number(text);
+
+        }
+
+        if(trEl.hasClass("selected"))
+
+          QaTestSet.prototype.selected=this;
+
+        el.text(this.name);
+
+        this.parent.addValue(this.value);
+
+       }
+
+
+
+    };
+
+    QaTestSet.prototype.generateParentView=function(tdDirCol){
+
+      this.parent.generateParentView(tdDirCol,this.name);
+
+    };
+
+    QaTestSet.prototype.selected=null;
+
+
+
+
+
+    var QaTestCollection=new QaTestCollection(tdDirCol);
+
+    if(QaTestSet.prototype.selected){
+
+      QaTestSet.prototype.selected.generateParentView(tdDirCol);
+
+    }else{
+
+      QaTestCollection.generateView(tdDirCol);
+
+    }
+
+    // QaTestCollectionCase.prototype.addToType=function(words){
+
+    //   if(words.length>0)
+
+    //     this.name=words[0];
+
+    // };
+
+    QaTestCollectionInstance.test=QaTestCollection;
+
+    $j('#content').show();
+
+  })(QaTestCollectionInstance);
+
+
+
+  
+
+</script>
+
+
+
+<div id="accordion-panel"/>
+
+
+
+<%= render :partial => 'footer' -%>
+
