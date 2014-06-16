@@ -454,7 +454,7 @@
 
           var testResult=types[value].value;
 
-          if(testResult==0)testResult="";
+          if(!testResult)testResult="";
 
           var tr=$j("<tr></tr>").attr("class", index%2==0?"even":"odd");
 
@@ -566,7 +566,7 @@
 
           var testResult=types[value].value;
 
-          if(testResult==0)testResult="";
+          if(!testResult)testResult="";
 
           var tr=$j("<tr></tr>").attr("class", index%2==0?"even":"odd");
 

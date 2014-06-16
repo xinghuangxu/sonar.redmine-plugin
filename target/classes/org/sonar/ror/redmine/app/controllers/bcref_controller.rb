@@ -5,15 +5,7 @@ class BcrefController < ApplicationController
 
 	def showcharts
 		@imgs={
-			"Denali"=>{
-				"Defect Trend"=>"Denali/Denali2_DefectTrend.GIF",
-				"Iteration Burn Down"=>"Denali/Denali2_IterationBurnDown.GIF",
-				"Iterations Velocity"=>"Denali/Denali2_IterationsVelocity.GIF",
-				"Pln Act FTE Functional Group"=>"Denali/Denali2_PlnActFTE_FunctionalGroup.GIF",
-				"Pln Act FTE"=>"Denali/Denali2_PlnActFTE.gif",
-				"Pln Act Velocity"=>"Denali/Denali2_PlnActVelocity.GIF",
-				"Story Burn Up"=>"Denali/Denali2_StoryBurnUp.GIF"
-			},
+			
 			
 			"Kingston"=>{
 				"Kingston EIT"=>"Kingston/Kingston_Slide1.JPG",
@@ -34,6 +26,16 @@ class BcrefController < ApplicationController
 				"RR Iteration Charts"=>"RR/RR_Slide2.JPG",
 				"RR Planned Actual Resources"=>"RR/RR_Slide3.JPG",
 				"RR Reconstruct Feature"=>"RR/RR_Slide4.JPG"
+			},
+			
+			"Denali"=>{
+				"Defect Trend"=>"Denali/Denali2_DefectTrend.GIF",
+				"Iteration Burn Down"=>"Denali/Denali2_IterationBurnDown.GIF",
+				"Iterations Velocity"=>"Denali/Denali2_IterationsVelocity.GIF",
+				"Pln Act FTE Functional Group"=>"Denali/Denali2_PlnActFTE_FunctionalGroup.GIF",
+				"Pln Act FTE"=>"Denali/Denali2_PlnActFTE.gif",
+				"Pln Act Velocity"=>"Denali/Denali2_PlnActVelocity.GIF",
+				"Story Burn Up"=>"Denali/Denali2_StoryBurnUp.GIF"
 			}
 			
 		}
