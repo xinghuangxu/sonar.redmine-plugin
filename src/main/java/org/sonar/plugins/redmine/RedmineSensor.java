@@ -46,11 +46,11 @@ public class RedmineSensor implements Sensor {
   }
 
   public boolean shouldExecuteOnProject(Project project) {
-	return redmineSettings.getBcref();
-//    if (redmineSettings.missingMandatoryParameters()) {
-//      LOG.info("Redmine issues sensor will not run as some parameters are missing.");
-//    }
-//    return project.isRoot() && !redmineSettings.missingMandatoryParameters();
+	//return redmineSettings.getBcref();
+    if (redmineSettings.missingMandatoryParameters()) {
+      LOG.info("Redmine issues sensor will not run as some parameters are missing.");
+    }
+    return project.isRoot() && !redmineSettings.missingMandatoryParameters();
   }
 
   public void analyse(Project project, SensorContext context) {

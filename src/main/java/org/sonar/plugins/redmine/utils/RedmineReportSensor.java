@@ -31,6 +31,7 @@ import org.sonar.api.batch.SensorContext;
 import org.sonar.api.config.Settings;
 import org.sonar.api.resources.Project;
 import org.sonar.api.utils.SonarException;
+import org.sonar.plugins.redmine.config.RedmineSettings;
 import org.sonar.plugins.redmine.exceptions.EmptyReportException;
 
 public class RedmineReportSensor implements Sensor {
@@ -38,13 +39,22 @@ public class RedmineReportSensor implements Sensor {
 	protected String LanguageKey = "c++";
 	protected Settings conf = null;
 	protected Logger LOG = LoggerFactory.getLogger(RedmineReportSensor.class);
+	private final RedmineSettings redmineSettings;
 
-	public RedmineReportSensor(Settings conf) {
+	public RedmineReportSensor(Settings conf,RedmineSettings redmineSettings) {
 		this.conf = conf;
+		this.redmineSettings = redmineSettings;
 	}
 
 	public boolean shouldExecuteOnProject(Project project) {
-		return LanguageKey.equals(project.getLanguageKey());
+		return true;
+//		boolean isParameterOMissing=redmineSettings.missingMandatoryParameters();
+//		if (isParameterOMissing) {
+//		      LOG.info("Redmine issues sensor will not run as some parameters are missing.");
+//		    }
+//		
+//		boolean result=project.isRoot() && !isParameterOMissing;
+//		return result;
 	}
 
 	/**

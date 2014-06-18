@@ -36,6 +36,7 @@ public class TestExecutionWidget extends AbstractRubyTemplate implements RubyRai
 
   @Override
   protected String getTemplatePath() {
-    return "/org/sonar/redmine/test_execution_widget.html.erb";
+    //return "/org/sonar/redmine/test_execution_widget.html.erb";
+    return "C:\\Users\\leonx\\Desktop\\sonar\\sonar-bcref-master\\src\\main\\resources\\org\\sonar\\redmine\\test_execution_widget.html.erb";
   }
 }

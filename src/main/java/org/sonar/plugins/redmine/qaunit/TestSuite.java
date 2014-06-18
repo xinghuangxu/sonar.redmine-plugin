@@ -48,6 +48,7 @@ public class TestSuite {
 	public String getKey() {
 		return key;
 	}
+	
 
 	public int getErrors() {
 		return errors;

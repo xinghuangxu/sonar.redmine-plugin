@@ -25,6 +25,7 @@ import java.io.IOException;
 
 
 
+
 import org.sonar.api.batch.SensorContext;
 import org.sonar.api.config.Settings;
 import org.sonar.api.measures.CoreMetrics;
@@ -33,6 +34,7 @@ import org.sonar.api.resources.Project;
 import org.sonar.api.resources.Qualifiers;
 import org.sonar.api.utils.ParsingUtils;
 import org.sonar.api.utils.StaxParser;
+import org.sonar.plugins.redmine.config.RedmineSettings;
 import org.sonar.plugins.redmine.metrics.TestExecutionMetrics;
 import org.sonar.plugins.redmine.utils.RedmineReportSensor;
 
@@ -43,8 +45,8 @@ public class TestExecutionSensor extends RedmineReportSensor {
 	public static final String REPORT_PATH_KEY = "sonar.qa.reportPath";
 	private static final String DEFAULT_REPORT_PATH = "qa-reports/*.xml";
 	
-	public TestExecutionSensor(Settings conf) {
-		super(conf);
+	public TestExecutionSensor(Settings conf,RedmineSettings redmineSettings) {
+		super(conf,redmineSettings);
 	}
 	
 
@@ -112,19 +114,40 @@ public class TestExecutionSensor extends RedmineReportSensor {
 	private void saveTestMetrics(SensorContext context,
 			org.sonar.api.resources.File resource, TestSuite fileReport,
 			double testsCount) {
-//		context.saveMeasure(resource, CoreMetrics.SKIPPED_TESTS,
-//				(double) fileReport.getSkipped());
-//		context.saveMeasure(resource, CoreMetrics.TESTS, testsCount);
-//		context.saveMeasure(resource, CoreMetrics.TEST_ERRORS,
-//				(double) fileReport.getErrors());
-//		context.saveMeasure(resource, CoreMetrics.TEST_FAILURES,
-//				(double) fileReport.getFailures());
-//		context.saveMeasure(resource, CoreMetrics.TEST_EXECUTION_TIME,
-//				(double) fileReport.getTime());
+		double runned=0;
+		if(fileReport.getSkipped()==0){
+			runned=1;
+		}
+		
+		double failed=(double)fileReport.getFailures();
+		double closed=0;
+		double closedDensity=0;
+		if(runned==1&&failed==0){
+			closed=1;
+			closedDensity=100;
+		}
+		double remaining=0;
+		if(runned==0 || failed ==1)
+			remaining=1;
+		
+		context.saveMeasure(resource, TestExecutionMetrics.TEST_DEFINED,
+				1d);
+		context.saveMeasure(resource, TestExecutionMetrics.TEST_EXECUTED,
+				runned);
+		context.saveMeasure(resource, TestExecutionMetrics.TEST_CLOSED,
+				closed);
+		context.saveMeasure(resource, TestExecutionMetrics.TEST_CLOSED_DENSITY,
+				closed);
+		context.saveMeasure(resource, TestExecutionMetrics.TEST_REMAINING,
+				remaining);
+		context.saveMeasure(resource, TestExecutionMetrics.TEST_FAILURES,
+				failed);
+		context.saveMeasure(resource, TestExecutionMetrics.TEST_BLOCKED,
+				0d);
 		
 		context.saveMeasure(resource, TestExecutionMetrics.SKIPPED_TESTS,
 				(double) fileReport.getSkipped());
-		context.saveMeasure(resource, TestExecutionMetrics.TESTS, testsCount);
+		context.saveMeasure(resource, TestExecutionMetrics.TESTS, testsCount+fileReport.getSkipped());
 		context.saveMeasure(resource, TestExecutionMetrics.TEST_ERRORS,
 				(double) fileReport.getErrors());
 		context.saveMeasure(resource, TestExecutionMetrics.TEST_FAILURES,
@@ -136,13 +159,10 @@ public class TestExecutionSensor extends RedmineReportSensor {
 				- fileReport.getFailures();
 		if (testsCount > 0) {
 			double percentage = passedTests * 100d / testsCount;
-//			context.saveMeasure(resource, CoreMetrics.TEST_SUCCESS_DENSITY,
-//					ParsingUtils.scaleValue(percentage));
+
 			context.saveMeasure(resource, TestExecutionMetrics.TEST_SUCCESS_DENSITY,
 					ParsingUtils.scaleValue(percentage));
 		}
-//		context.saveMeasure(resource, new Measure(CoreMetrics.TEST_DATA,
-//				fileReport.getDetails()));
 		context.saveMeasure(resource, new Measure(TestExecutionMetrics.TEST_DATA,
 				fileReport.getDetails()));
 	}

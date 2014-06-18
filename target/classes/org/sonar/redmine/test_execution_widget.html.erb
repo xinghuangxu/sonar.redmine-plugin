@@ -2,29 +2,33 @@
 skipped_name='qa_skipped_tests'
 
 
-tests_measure=measure('qa_tests')
+tests_defined=measure('qa_test_defined')
 execution_time=measure('qa_test_execution_time')
-success_percentage=measure('qa_test_success_density')
+success_percentage=measure('qa_test_closed_density')
 
 tests_failures=measure('qa_test_failures')
 tests_error=measure('qa_test_errors')
 
 resource_id=@resource.permanent_id
 
-if tests_measure
+if tests_defined
   %>
   <table width="100%">
     <tr>
       <td valign="top" width="50%" nowrap>
         <%
-        if tests_measure
+        if tests_defined
           %>
           <div class="dashbox">
             <h3>QA Tests</h3>
             <p><span class="big">
               <% #suc_per_url='/test_execution/measures/'+resource_id+'?metric=qa_test_success_density' %>
-              <%= format_measure(success_percentage, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_success_density') %></span>
+              <%= format_measure(success_percentage, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_closed_density') %></span>
               <%= dashboard_configuration.selected_period? ? format_variation(success_percentage) : trend_icon(success_percentage) -%>
+            </p>
+            <p>
+              <%= format_measure(tests_defined, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_defined') %>
+              <%= dashboard_configuration.selected_period? ? format_variation(tests_failures) : trend_icon(tests_failures) -%>
             </p>
             <p>
               <%= format_measure(tests_failures, :suffix => message('widget.code_coverage.failures.suffix'), :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_failures') %>
@@ -35,8 +39,8 @@ if tests_measure
               <%= dashboard_configuration.selected_period? ? format_variation(tests_error) : trend_icon(tests_error) -%>
             </p>
             <p>
-              <%= format_measure(tests_measure, :suffix => message('widget.code_coverage.tests.suffix'), :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_tests') %>
-              <%= dashboard_configuration.selected_period? ? format_variation(tests_measure) : trend_icon(tests_measure) -%>
+              <%= format_measure(tests_defined, :suffix => message('widget.code_coverage.tests.suffix'), :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_tests') %>
+              <%= dashboard_configuration.selected_period? ? format_variation(tests_defined) : trend_icon(tests_defined) -%>
             </p>
             <% skipped_measure=measure(skipped_name)
             if dashboard_configuration.selected_period? || (skipped_measure && skipped_measure.value && skipped_measure.value>0)
@@ -53,6 +57,101 @@ if tests_measure
             </div>
             <% end %>
           </td>
-        </tr>
-      </table>
-      <% end %>
+
+
+          <%
+
+          defined_key=total
+          executed_key=total-skipped
+          closed_key=executed-failed
+          closed_density_key=closed/executed*100
+          remaining_key=total-closed
+          failed_key=tests_failures.value
+          blocked_key='';
+
+          defined=total
+          executed=total-skipped
+          closed=executed-failed
+          percent_closed=closed/executed*100
+          remaining=total-closed
+          failed=tests_failures.value
+          blocked;
+          
+          
+          %>
+
+          <td width="50%" valign="top" nowrap="">
+
+            <table class="clear width100">
+              <tbody>
+
+                <tr>
+                  <td><i class="icon-info"></i> Defined:</td>
+                  <td style="padding: 0 5px;" align="right">
+                    <span><%= sprintf "%.0f", defined %></span></a></td>
+                    <td>&nbsp;</td>
+                    <td align="left" style="padding-bottom:2px; padding-top:2px;">
+                      <div class="barchart" style="width: 70px"><div style="width: 100%;background-color:#777;"></div></div>
+                    </td>
+                  </tr>
+
+
+                 <tr>
+                  <td><i class="icon-info"></i> Executed:</td>
+                  <td style="padding: 0 5px;" align="right">
+                    <span><%= sprintf "%.0f", executed %></span></a></td>
+                    <td>&nbsp;</td>
+                    <td align="left" style="padding-bottom:2px; padding-top:2px;">
+                      <div class="barchart" style="width: 70px"><div style="width: <%= executed/defined*100 %>%;background-color:#777;"></div></div>
+                    </td>
+                  </tr>
+
+                  <tr>
+                  <td><i class="icon-severity-minor"></i> Closed:</td>
+                  <td style="padding: 0 5px;" align="right">
+                    <span><%= sprintf "%.0f", closed %></span></a></td>
+                    <td>&nbsp;</td>
+                    <td align="left" style="padding-bottom:2px; padding-top:2px;">
+                      <div class="barchart" style="width: 70px"><div style="width: <%= closed/defined*100 %>%;background-color:#777;"></div></div>
+                    </td>
+                  </tr>
+
+
+                  <tr>
+                  <td> <i class="icon-severity-minor"></i></i>% Closed:</td>
+                  <td style="padding: 0 5px;" align="right">
+                    <span><%= sprintf "%.0f", percent_closed %>%</span></a></td>
+                    <td>&nbsp;</td>
+                    <td align="left" style="padding-bottom:2px; padding-top:2px;">
+                      <div class="barchart" style="width: 70px"><div style="width: <%= percent_closed %>%;background-color:#777;"></div></div>
+                    </td>
+                  </tr>
+
+                  <tr>
+                  <td><i class="icon-info"></i> Remaining:</td>
+                  <td style="padding: 0 5px;" align="right">
+                    <span><%= sprintf "%.0f", remaining %></span></a></td>
+                    <td>&nbsp;</td>
+                    <td align="left" style="padding-bottom:2px; padding-top:2px;">
+                      <div class="barchart" style="width: 70px"><div style="width: <%= remaining/defined*100 %>%;background-color:#777;"></div></div>
+                    </td>
+                  </tr>
+
+                  <tr>
+                  <td><i class="icon-severity-blocker"></i> Failed:</td>
+                  <td style="padding: 0 5px;" align="right">
+                    <span><%= sprintf "%.0f", failed %></span></a></td>
+                    <td>&nbsp;</td>
+                    <td align="left" style="padding-bottom:2px; padding-top:2px;">
+                      <div class="barchart" style="width: 70px"><div style="width: <%= failed/defined*100 %>%;background-color:#777;"></div></div>
+                    </td>
+                  </tr>
+
+
+                    
+                                </tbody></table>
+                              </td>
+
+                            </tr>
+                          </table>
+                          <% end %>

@@ -93,10 +93,65 @@ public class TestExecutionMetrics implements Metrics {
 			.setDescription("QA tests details")
 			.setDirection(Metric.DIRECTION_WORST).setDomain(DOMAIN_TESTS)
 			.create();
-
+	
+	
+	public static final String TEST_DEFINED_KEY="qa_test_defined";
+	public static final Metric TEST_DEFINED = new Metric.Builder(TEST_DEFINED_KEY,
+			"QA tests defined", Metric.ValueType.INT)
+			.setDescription("Number of QA tests defined")
+			.setDirection(Metric.DIRECTION_WORST).setQualitative(false)
+			.setFormula(new SumChildValuesFormula(false))
+			.setDomain(DOMAIN_TESTS).create();
+	
+	public static final String TEST_EXECUTED_KEY="qa_test_executed";
+	public static final Metric TEST_EXECUTED = new Metric.Builder(TEST_EXECUTED_KEY,
+			"QA tests executed", Metric.ValueType.INT)
+			.setDescription("Number of QA tests executed")
+			.setDirection(Metric.DIRECTION_WORST).setQualitative(false)
+			.setFormula(new SumChildValuesFormula(false))
+			.setDomain(DOMAIN_TESTS).create();
+	
+	public static final String TEST_CLOSED_KEY="qa_test_closed";
+	public static final Metric TEST_CLOSED = new Metric.Builder(TEST_CLOSED_KEY,
+			"QA tests closed", Metric.ValueType.INT)
+			.setDescription("Number of QA tests closed")
+			.setDirection(Metric.DIRECTION_WORST).setQualitative(false)
+			.setFormula(new SumChildValuesFormula(false))
+			.setDomain(DOMAIN_TESTS).create();
+	
+	
+	public static final String TEST_CLOSED_DENSITY_KEY = "qa_test_closed_density";
+	public static final Metric TEST_CLOSED_DENSITY = new Metric.Builder(
+			TEST_CLOSED_DENSITY_KEY, "QA test closed (%)",
+			Metric.ValueType.PERCENT)
+			.setDescription("Density of closed QA tests")
+			.setDirection(Metric.DIRECTION_WORST).setQualitative(true)
+			.setFormula(new MeanAggregationFormula(false))
+			.setDomain(DOMAIN_TESTS).setWorstValue(0.0).setBestValue(100.0)
+			.setOptimizedBestValue(true).create();
+	
+	
+	public static final String TEST_REMAINING_KEY="qa_test_remaining";
+	public static final Metric TEST_REMAINING = new Metric.Builder(TEST_REMAINING_KEY,
+			"QA tests remaining", Metric.ValueType.INT)
+			.setDescription("Number of QA tests remain")
+			.setDirection(Metric.DIRECTION_WORST).setQualitative(false)
+			.setFormula(new SumChildValuesFormula(false))
+			.setDomain(DOMAIN_TESTS).create();
+	
+	public static final String TEST_BLOCKED_KEY="qa_test_blocked";
+	public static final Metric TEST_BLOCKED = new Metric.Builder(TEST_BLOCKED_KEY,
+			"QA tests blocked", Metric.ValueType.INT)
+			.setDescription("Number of QA tests blocked")
+			.setDirection(Metric.DIRECTION_WORST).setQualitative(false)
+			.setFormula(new SumChildValuesFormula(false))
+			.setDomain(DOMAIN_TESTS).create();
+	
+	
 	@Override
 	public List<Metric> getMetrics() {
-		return ImmutableList.of(TESTS, TEST_EXECUTION_TIME,TEST_ERRORS,SKIPPED_TESTS,TEST_FAILURES,TEST_SUCCESS_DENSITY,TEST_DATA);
+		return ImmutableList.of(TESTS, TEST_EXECUTION_TIME,TEST_ERRORS,SKIPPED_TESTS,TEST_FAILURES,TEST_SUCCESS_DENSITY,TEST_DATA
+				,TEST_DEFINED,TEST_EXECUTED,TEST_CLOSED,TEST_CLOSED_DENSITY,TEST_REMAINING,TEST_BLOCKED);
 	}
 
 }
