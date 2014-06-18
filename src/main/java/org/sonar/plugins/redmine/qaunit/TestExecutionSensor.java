@@ -132,16 +132,34 @@ public class TestExecutionSensor extends RedmineReportSensor {
 		
 		context.saveMeasure(resource, TestExecutionMetrics.TEST_DEFINED,
 				1d);
-		context.saveMeasure(resource, TestExecutionMetrics.TEST_EXECUTED,
-				runned);
-		context.saveMeasure(resource, TestExecutionMetrics.TEST_CLOSED,
-				closed);
-		context.saveMeasure(resource, TestExecutionMetrics.TEST_CLOSED_DENSITY,
-				closed);
-		context.saveMeasure(resource, TestExecutionMetrics.TEST_REMAINING,
-				remaining);
-		context.saveMeasure(resource, TestExecutionMetrics.TEST_FAILURES,
-				failed);
+		if(runned==1){
+			context.saveMeasure(resource, TestExecutionMetrics.TEST_EXECUTED,
+					runned);
+		}
+		if(closed==1){
+			context.saveMeasure(resource, TestExecutionMetrics.TEST_CLOSED,
+					closed);
+		}
+		final double passedTests = testsCount - fileReport.getFailures();
+		if(runned==1){
+			double percentage = passedTests * 100d / testsCount;
+
+			context.saveMeasure(resource, TestExecutionMetrics.TEST_CLOSED_DENSITY,
+					ParsingUtils.scaleValue(percentage));
+		}
+//		if(runned==1){
+//			context.saveMeasure(resource, TestExecutionMetrics.TEST_CLOSED_DENSITY,
+//					closedDensity);
+//		}
+		if(remaining==1){
+			context.saveMeasure(resource, TestExecutionMetrics.TEST_REMAINING,
+					remaining);
+		}
+		if(failed==1){
+			context.saveMeasure(resource, TestExecutionMetrics.TEST_FAILURES,
+					failed);
+		}
+		
 		context.saveMeasure(resource, TestExecutionMetrics.TEST_BLOCKED,
 				0d);
 		
@@ -150,19 +168,19 @@ public class TestExecutionSensor extends RedmineReportSensor {
 		context.saveMeasure(resource, TestExecutionMetrics.TESTS, testsCount+fileReport.getSkipped());
 		context.saveMeasure(resource, TestExecutionMetrics.TEST_ERRORS,
 				(double) fileReport.getErrors());
-		context.saveMeasure(resource, TestExecutionMetrics.TEST_FAILURES,
-				(double) fileReport.getFailures());
+//		context.saveMeasure(resource, TestExecutionMetrics.TEST_FAILURES,
+//				(double) fileReport.getFailures());
 		context.saveMeasure(resource, TestExecutionMetrics.TEST_EXECUTION_TIME,
 				(double) fileReport.getTime());
 		
-		final double passedTests = testsCount - fileReport.getErrors()
-				- fileReport.getFailures();
-		if (testsCount > 0) {
-			double percentage = passedTests * 100d / testsCount;
-
-			context.saveMeasure(resource, TestExecutionMetrics.TEST_SUCCESS_DENSITY,
-					ParsingUtils.scaleValue(percentage));
-		}
+//		final double passedTests = testsCount - fileReport.getErrors()
+//				- fileReport.getFailures();
+//		if (testsCount > 0) {
+//			double percentage = passedTests * 100d / testsCount;
+//
+//			context.saveMeasure(resource, TestExecutionMetrics.TEST_SUCCESS_DENSITY,
+//					ParsingUtils.scaleValue(percentage));
+//		}
 		context.saveMeasure(resource, new Measure(TestExecutionMetrics.TEST_DATA,
 				fileReport.getDetails()));
 	}

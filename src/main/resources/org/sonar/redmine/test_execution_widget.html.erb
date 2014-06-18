@@ -13,108 +13,112 @@ resource_id=@resource.permanent_id
 
 if tests_defined&&(@resource.qualifier=="TRK")
   %>
-<style>
-#qa-test-result a{
+
+  <%
+
+  defined_key='qa_test_defined'
+  executed_key='qa_test_executed'
+  closed_key='qa_test_closed'
+  closed_density_key='qa_test_closed_density'
+  remaining_key='qa_test_remaining'
+  failed_key='qa_test_failures'
+  blocked_key='qa_test_blocked'
+
+  defined=measure(defined_key)
+  executed=measure(executed_key)
+  closed=measure(closed_key)
+  closed_density=measure(closed_density_key)
+  remaining=measure(remaining_key)
+  failed=measure(failed_key)
+  blocked=measure(blocked_key)
+
+
+  executed_value=executed.value
+  defined_value=defined.value
+  closed_value=closed.value
+  closed_density_value=closed_value/executed_value*100
+  remaining_value=remaining.value
+  failed_value=failed.value
+  blocked_value=blocked.value
+
+  %>
+  <style>
+  #qa-test-result a{
     text-decoration:none;
-} 
+  } 
 
-#qa-test-result{
-  margin-top:10px;
-}
-#qa-test-result a:hover{
-  text-decoration:underline;
-}
+  #qa-test-result{
+    margin-top:10px;
+  }
+  #qa-test-result a:hover{
+    text-decoration:underline;
+  }
 
-#qa-test-result tr{
-  line-height: 18px;
-}
-</style>
+  #qa-test-result tr{
+    line-height: 18px;
+  }
+  </style>
+
+  <script>
+    $j(function(){
+      $j('#qa-test-result').prev("i").remove();
+    });
+
+  </script>
 
   <table width="100%">
     <tr>
-      <td valign="top" width="50%" nowrap>
-        <%
-        if tests_defined
-          %>
-          <div class="dashbox">
-            <h3>QA Tests </h3>
-            <p><span class="big">
-              <% #suc_per_url='/test_execution/measures/'+resource_id+'?metric=qa_test_success_density' %>
-              <%= format_measure(success_percentage, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_closed_density') %></span>
-              <%= dashboard_configuration.selected_period? ? format_variation(success_percentage) : trend_icon(success_percentage) -%>
-            </p>
+      <td valign="top" width="70%" nowrap>
+        <div class="dashbox" style="width:300px">
+          <h3>QA Tests </h3>
+          <p><span class="big">
+            <%= sprintf "%.2f", closed_density_value%>%
+           </span>
 
-             <%
-
-          defined_key='qa_test_defined'
-          executed_key='qa_test_executed'
-          closed_key='qa_test_closed'
-          closed_density_key='qa_test_closed_density'
-          remaining_key='qa_test_remaining'
-          failed_key='qa_test_failures'
-          blocked_key='qa_test_blocked'
-
-          defined=measure(defined_key)
-          executed=measure(executed_key)
-          closed=measure(closed_key)
-          closed_density=measure(closed_density_key)
-          remaining=measure(remaining_key)
-          failed=measure(failed_key)
-          blocked=measure(blocked_key)
-          
-
-          executed_value=executed.value
-          defined_value=defined.value
-          closed_value=closed.value
-          closed_density_value=closed_density.value
-          remaining_value=remaining.value
-          failed_value=failed.value
-          blocked_value=blocked.value
-
-          %>
+          </p>
 
 
 
-            <table id="qa-test-result" class="clear width100">
-              <tbody>
+          <table id="qa-test-result" class="clear width100">
+            <tbody>
+
+              <tr>
+                <td><i class="icon-info"></i> Defined:</td>
+                <td style="padding: 0 5px;" align="right">
+                  <span> 
+                    <%= format_measure(defined, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_defined',:class=>'nolink drilldown_BLOCKER') %>
+
+                  </span></a></td>
+                  <td>&nbsp;</td>
+                  <td align="left" style="padding-bottom:2px; padding-top:2px;">
+                    <div class="barchart" style="width: 70px"><div style="width: 100%;background-color:#777;"></div></div>
+                    <%= dashboard_configuration.selected_period? ? format_variation(defined) : trend_icon(defined) -%>
+                  </td>
+                </tr>
 
                 <tr>
-                  <td><i class="icon-info"></i> Defined:</td>
+                  <td><i class="icon-info"></i> Executed:</td>
                   <td style="padding: 0 5px;" align="right">
-                    <span> 
-                      <%= format_measure(defined, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_defined',:class=>'nolink drilldown_BLOCKER') %>
-                      
-                    </span></a></td>
+                    <span>
+                      <%= format_measure(executed, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_executed') %>
+
+                    </span></td>
                     <td>&nbsp;</td>
                     <td align="left" style="padding-bottom:2px; padding-top:2px;">
-                      <div class="barchart" style="width: 70px"><div style="width: 100%;background-color:#777;"></div></div>
-                      <%= dashboard_configuration.selected_period? ? format_variation(defined) : trend_icon(defined) -%>
+                      <div class="barchart" style="width: 70px"><div style="width: <%= executed_value/defined_value*100  %>%;background-color:#777;"></div></div>
                     </td>
+                    <%= dashboard_configuration.selected_period? ? format_variation(executed) : trend_icon(executed) -%>
                   </tr>
 
                   <tr>
-                    <td><i class="icon-info"></i> Executed:</td>
+                    <td><i class="icon-severity-minor"></i> Closed:</td>
                     <td style="padding: 0 5px;" align="right">
                       <span>
-                      <%= format_measure(executed, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_executed') %>
-                     
-                      </span></td>
-                      <td>&nbsp;</td>
-                      <td align="left" style="padding-bottom:2px; padding-top:2px;">
-                        <div class="barchart" style="width: 70px"><div style="width: <%= executed_value/defined_value*100  %>%;background-color:#777;"></div></div>
-                      </td>
-                       <%= dashboard_configuration.selected_period? ? format_variation(executed) : trend_icon(executed) -%>
-                    </tr>
-
-                     <tr>
-                  <td><i class="icon-severity-minor"></i> Closed:</td>
-                  <td style="padding: 0 5px;" align="right">
-                    <span>
                        <%= format_measure(closed, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_closed') %>
-                      
-                    </span></a></td>
-                    <td>&nbsp;</td>
-                    <td align="left" style="padding-bottom:2px; padding-top:2px;">
+
+                     </span></a></td>
+                     <td>&nbsp;</td>
+                     <td align="left" style="padding-bottom:2px; padding-top:2px;">
                       <div class="barchart" style="width: 70px"><div style="width: <%= closed_value/defined_value*100 %>%;background-color:#777;"></div></div>
                       <%= dashboard_configuration.selected_period? ? format_variation(closed) : trend_icon(closed) -%>
                     </td>
@@ -122,75 +126,72 @@ if tests_defined&&(@resource.qualifier=="TRK")
 
 
                   <tr>
-                  <td> <i class="icon-severity-minor"></i></i>% Closed:</td>
-                  <td style="padding: 0 5px;" align="right">
-                    <span> 
-<%= format_measure(closed_density, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_closed_density') %>
-                      
-                    </span></a></td>
-                    <td>&nbsp;</td>
-                    <td align="left" style="padding-bottom:2px; padding-top:2px;">
-                      <div class="barchart" style="width: 70px"><div style="width: <%= closed_density_value %>%;background-color:#777;"></div></div>
+                    <td> <i class="icon-severity-minor"></i></i>% Closed:</td>
+                    <td style="padding: 0 5px;" align="right">
+                      <span> 
+                       <%= sprintf "%.2f", closed_density_value%>%
+                      </span></a></td>
+                      <td>&nbsp;</td>
+                      <td align="left" style="padding-bottom:2px; padding-top:2px;">
+                        <div class="barchart" style="width: 70px"><div style="width: <%= closed_density_value %>%;background-color:#777;"></div></div>
+                      </td>
+                      <%= dashboard_configuration.selected_period? ? format_variation(closed_density) : trend_icon(closed_density) -%>
+                    </tr>
+
+                    <tr>
+                      <td><i class="icon-info"></i> Remaining:</td>
+                      <td style="padding: 0 5px;" align="right">
+                        <span> 
+                          <%= format_measure(remaining, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_remaining') %>
+
+                        </span></a></td>
+                        <td>&nbsp;</td>
+                        <td align="left" style="padding-bottom:2px; padding-top:2px;">
+                          <div class="barchart" style="width: 70px"><div style="width: <%= remaining_value/defined_value*100 %>%;background-color:#777;"></div></div>
+                          <%= dashboard_configuration.selected_period? ? format_variation(remaining) : trend_icon(remaining) -%>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td><i class="icon-severity-blocker"></i> Failed:</td>
+                        <td style="padding: 0 5px;" align="right">
+                          <span>
+                           <%= format_measure(failed, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_failures') %>
+
+                         </span></a></td>
+                         <td>&nbsp;</td>
+                         <td align="left" style="padding-bottom:2px; padding-top:2px;">
+                          <div class="barchart" style="width: 70px"><div style="width: <%= failed_value/defined_value*100 %>%;background-color:#777;"></div></div>
+                          <%= dashboard_configuration.selected_period? ? format_variation(failed) : trend_icon(failed) -%>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <td><i class="icon-severity-blocker"></i> Blocked:</td>
+                        <td style="padding: 0 5px;" align="right">
+                          <span>
+                            <%= format_measure(blocked, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_blocked') %>
+
+                          </span></a></td>
+                          <td>&nbsp;</td>
+                          <td align="left" style="padding-bottom:2px; padding-top:2px;">
+                            <div class="barchart" style="width: 70px"><div style="width: <%= blocked_value/defined_value*100 %>%;background-color:#777;"></div></div>
+                            <%= dashboard_configuration.selected_period? ? format_variation(blocked) : trend_icon(blocked) -%>
+                          </td>
+                        </tr>
+
+
+
+                      </tbody></table>
                     </td>
-                    <%= dashboard_configuration.selected_period? ? format_variation(closed_density) : trend_icon(closed_density) -%>
+
                   </tr>
-
-                  <tr>
-                  <td><i class="icon-info"></i> Remaining:</td>
-                  <td style="padding: 0 5px;" align="right">
-                    <span> 
-                    <%= format_measure(remaining, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_remaining') %>
-                      
-                    </span></a></td>
-                    <td>&nbsp;</td>
-                    <td align="left" style="padding-bottom:2px; padding-top:2px;">
-                      <div class="barchart" style="width: 70px"><div style="width: <%= remaining_value/defined_value*100 %>%;background-color:#777;"></div></div>
-                      <%= dashboard_configuration.selected_period? ? format_variation(remaining) : trend_icon(remaining) -%>
-                    </td>
-                  </tr>
-
-                  <tr>
-                  <td><i class="icon-severity-blocker"></i> Failed:</td>
-                  <td style="padding: 0 5px;" align="right">
-                    <span>
- <%= format_measure(failed, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_failures') %>
-             
-                    </span></a></td>
-                    <td>&nbsp;</td>
-                    <td align="left" style="padding-bottom:2px; padding-top:2px;">
-                      <div class="barchart" style="width: 70px"><div style="width: <%= failed_value/defined_value*100 %>%;background-color:#777;"></div></div>
-                       <%= dashboard_configuration.selected_period? ? format_variation(failed) : trend_icon(failed) -%>
-                    </td>
-                  </tr>
-
-                   <tr>
-                  <td><i class="icon-severity-blocker"></i> Blocked:</td>
-                  <td style="padding: 0 5px;" align="right">
-                    <span>
-                      <%= format_measure(blocked, :suffix => '', :url => '/test_execution/measures/'+resource_id.to_s+'?metric=qa_test_blocked') %>
-              
-                    </span></a></td>
-                    <td>&nbsp;</td>
-                    <td align="left" style="padding-bottom:2px; padding-top:2px;">
-                      <div class="barchart" style="width: 70px"><div style="width: <%= blocked_value/defined_value*100 %>%;background-color:#777;"></div></div>
-                      <%= dashboard_configuration.selected_period? ? format_variation(blocked) : trend_icon(blocked) -%>
-                    </td>
-                  </tr>
-
-
-                    
-                  </tbody></table>
-                </td>
-
-              </tr>
-            </table>
-
-
-         
-            </div>
-            <% end %>
+                </table>
 
 
 
-         
-            <% end %>
+              </div>
+              <% end %>
+
+
+

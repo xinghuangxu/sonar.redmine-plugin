@@ -110,7 +110,15 @@
        end
     %>
 </div>
+
+<style>
+.scrollable{
+  height: 244px;
+}
+</style>
 <script>
+
+
   <% for i in 0...@drilldown.columns.size do  %>
   $j('#col_<%= i -%> tr.selected').each(function (index,item) {
     item.scrollIntoView(true);
@@ -130,6 +138,7 @@
     var tDrilldown=$j('#tb-drilldown');
     var tdDirCol=$j('.qa-dir-col');
     var tdFileCol=$j('.qa-file-col');
+    tdDirCol.prev('td').remove();
     tdDirCol.hide();
    
     
@@ -233,7 +242,7 @@
         this.generateView(tdDirCol,key,true);
       }
     };
-    QaTypeCollection.prototype.view=$j("<td nowrap></td>").attr("class",tdDirCol.attr("class"));;
+    QaTypeCollection.prototype.view=$j("<td nowrap></td>");;
     tdDirCol.before(QaTypeCollection.prototype.view);
     function QaLevelCollection(parent,name){
       this.chilClassName="QaTestSetCollection";
@@ -365,5 +374,10 @@
   })(QaTestCollectionInstance);
   
 </script>
+</script>
+
+
+
 <div id="accordion-panel"/>
+
 <%= render :partial => 'footer' -%>
